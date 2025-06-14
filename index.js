@@ -50,7 +50,7 @@ app.post('/register', async (req, res) => {
   try {
     const userId = uuidv4();
 
-    const qrContent = `http://localhost:3001/verify/${userId}`;
+    const qrContent = `https://qr-production-7500.up.railway.app/verify/${userId}`;
     const qrFolder = path.join(__dirname, 'qrcodes');
     const qrPath = path.join(qrFolder, `${userId}.png`);
 

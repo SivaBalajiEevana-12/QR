@@ -46,7 +46,7 @@ app.post('/register', async (req, res) => {
   if (!name || !whatsappNumber || !age || !collegeOrWorking || !place || selectedBook === undefined || interestedInGitaSession === undefined) {
     return res.status(400).json({ message: "All fields are required" });
   }
-
+  let phone="91"+whatsappNumber;
   try {
     const userId = uuidv4();
 
@@ -72,7 +72,7 @@ app.post('/register', async (req, res) => {
     // Save user with the Cloudinary URL
     const newUser = new user({
       name,
-      whatsappNumber,
+      whatsappNumber:phone,
       age,
       collegeOrWorking,
       place,
@@ -90,36 +90,45 @@ app.post('/register', async (req, res) => {
 const API_KEY = 'zbut4tsg1ouor2jks4umy1d92salxm38';
 const DESTINATION_PHONE_NUMBER = '917075176108'; // Replace with the real phone number
 
-const requestBody = {
+const axios = require('axios');
+const qs = require('qs'); // For URL-encoded data
+
+const data = qs.stringify({
   channel: 'whatsapp',
-  source: '917075176108', // Your Gupshup source number
-  destination: DESTINATION_PHONE_NUMBER,
-  'src.name': '4KoeJVChI420QyWVhAW1kE7L', // Your Gupshup App Name
-  template: {
-    id: '43aa4337-ea38-44f8-b199-2515326360a2', // Your Gupshup template ID
-    params: [name] // Dynamic parameters for your template
-  },
-  message: {
+  source: '917075176108', 
+  destination: `${whatsappNumber}`,
+  'src.name': '4KoeJVChI420QyWVhAW1kE7L',
+  template: JSON.stringify({
+    id: '43aa4337-ea38-44f8-b199-2515326360a2',
+    params: ['siva']
+  }),
+  message: JSON.stringify({
     image: {
-      link: uploadResult.secure_url // URL of your QR code image
+      link: 'https://fss.gupshup.io/0/public/0/0/gupshup/917075176108/4bb165ae-db4f-447b-99c5-aa064349dec7/1749050853458_download%2520%25281%2529.png'
     },
     type: 'image'
-  }
+  })
+});
+
+const config = {
+  method: 'post',
+  url: 'https://api.gupshup.io/wa/api/v1/template/msg',
+  headers: {
+    'Content-Type': 'application/x-www-form-urlencoded',
+    'apikey': 'zbut4tsg1ouor2jks4umy1d92salxm38',
+    'Cache-Control': 'no-cache'
+  },
+  data
 };
 
-axios.post('https://api.gupshup.io/wa/api/v1/template/msg', qs.stringify(requestBody), {
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      'apikey': API_KEY,
-      'Cache-Control': 'no-cache' // Note: 'cache-control' header can be combined
-    }
-  })
+axios(config)
   .then(response => {
-    console.log('Gupshup API Response:', response.data);
+    console.log('Success:', response.data);
   })
   .catch(error => {
-    console.error('Error sending Gupshup message:', error.response ? error.response.data : error.message);
+    console.error('Error:', error.response ? error.response.data : error.message);
   });
+
 
     return res.status(200).json({
       message: "Registration successful",
@@ -131,6 +140,9 @@ axios.post('https://api.gupshup.io/wa/api/v1/template/msg', qs.stringify(request
     return res.status(500).json({ message: "Internal server error" });
   }
 });
+
+
+
 app.get('/verify/:userId', async (req, res) => {
   const { userId } = req.params;
 
